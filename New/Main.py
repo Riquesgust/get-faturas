@@ -156,8 +156,19 @@ def main():
                 else:
                     y = tempHolder.split(None, 4)
                     iluPlub = y[0]
-                    del tempHolder
-                    del y
+                    if(iluPlub != "10,74"):
+                        tempHolder = iluPlub.split("-", 1)
+                        del iluPlub
+                        del y
+                        y = float(tempHolder[0].replace(".", "").replace(",", "."))
+                        print("The type of ")
+                        print(type(y))
+                        iluPlub = 0
+                        iluPlub = iluPlub + y
+                        print(iluPlub)
+                    else:
+                        del tempHolder
+                        del y
 
             # create a list with the keywords extracted from current document.
             if(nFatura == PDFname):
@@ -196,7 +207,13 @@ def main():
                 valorBru = y[0]
                 del tempHolder
                 del y
-                darf = float(valorBru.replace(".", "").replace(",",".")) - float(valorLiq.replace(".", "").replace(",", "."))
+                print("The type of is ")
+                print(type(iluPlub))
+                if((iluPlub != "10,74") and (iluPlub != "")):
+                    darf = (float(valorBru.replace(".", "").replace(",","."))) - (float(valorLiq.replace(".", "").replace(",", ".")))
+                    darf = darf  - iluPlub
+                else:
+                    darf = float(valorBru.replace(".", "").replace(",",".")) - float(valorLiq.replace(".", "").replace(",", "."))
                 entregaACI = ""
                 my_list = [ident,nFatura,mes,dataEmi,dataVenc,entregaACI,iluPlub,valorLiq, darf, valorBru]
                 processFailed = False
