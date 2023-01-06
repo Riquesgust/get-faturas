@@ -159,6 +159,8 @@ def main():
                     if(iluPlub != "10,74"):
                         tempHolder = iluPlub.split("-", 1)
                         iluPlub = float(tempHolder[0].replace(".", "").replace(",", "."))
+                    else:
+                        iluPlub = float(iluPlub.replace(".", "").replace(",", "."))
         
                     del tempHolder
                     del y
@@ -200,9 +202,13 @@ def main():
                 valorBru = y[0]
                 del tempHolder
                 del y
-                # Calculating correctly the value of "valorBru"
-                if((iluPlub != "10,74") and (iluPlub != "")):
+                # Calculating correctly the value of "valorBru" if iluPlub different than 10,74
+                if((iluPlub != 10.74) and (iluPlub != "")):
                     valorBru = (float(valorBru.replace(".", "").replace(",","."))) - iluPlub
+                    darf = valorBru - (float(valorLiq.replace(".", "").replace(",", ".")))
+                # Calculating correctly the value of "valorBru" if "iluPlub" is 10,74
+                elif((iluPlub == 10.74)):
+                    valorBru = (float(valorBru.replace(".", "").replace(",","."))) + iluPlub
                     darf = valorBru - (float(valorLiq.replace(".", "").replace(",", ".")))
                 else:
                     darf = float(valorBru.replace(".", "").replace(",",".")) - float(valorLiq.replace(".", "").replace(",", "."))
