@@ -210,8 +210,10 @@ def main():
                 elif((iluPlub == 10.74)):
                     valorBru = (float(valorBru.replace(".", "").replace(",","."))) + iluPlub
                     darf = valorBru - (float(valorLiq.replace(".", "").replace(",", ".")))
+                    darf = round(darf, 2)
                 else:
                     darf = float(valorBru.replace(".", "").replace(",",".")) - float(valorLiq.replace(".", "").replace(",", "."))
+                    darf = round(darf, 2)
                 entregaACI = ""
                 my_list = [ident,nFatura,mes,dataEmi,dataVenc,entregaACI,iluPlub,valorLiq, darf, valorBru]
                 processFailed = False
