@@ -200,8 +200,10 @@ def main():
                 valorBru = y[0]
                 del tempHolder
                 del y
+                # Calculating correctly the value of "valorBru"
                 if((iluPlub != "10,74") and (iluPlub != "")):
-                    darf = (float(valorBru.replace(".", "").replace(",","."))) - (float(valorLiq.replace(".", "").replace(",", "."))) - iluPlub
+                    valorBru = (float(valorBru.replace(".", "").replace(",","."))) - iluPlub
+                    darf = valorBru - (float(valorLiq.replace(".", "").replace(",", ".")))
                 else:
                     darf = float(valorBru.replace(".", "").replace(",",".")) - float(valorLiq.replace(".", "").replace(",", "."))
                 entregaACI = ""
