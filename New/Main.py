@@ -39,9 +39,9 @@ def main():
 
     root = Tk()
     root.withdraw()
-    #Salva o caminho da pasta 
+    #saves the path of the file
     currentPath = str(filedialog.askdirectory())    
-    #Adiciona a função *.pdf para abrir todas as pastas do diretório
+    #add the *.pdf fucntion to open all the files in the directory
     pdfPath = currentPath+"\*.pdf"
 
     for files in glob.glob(pdfPath):
@@ -54,17 +54,17 @@ def main():
             my_list =[]
             # use the function get_keyword as many times to get all the desired keywords from a pdf document.
             
-            # Separa entre Empresa e Residencial
+            # distinguishing between Residencial e Empresa
             start = ["www.cpflempresas.com.br"]
             end = ["Série"]
             isResidencial = get_keyword(start, end, text)
 
-            # Caso não seja empresa executa esse trecho
+            # If it isn't company
             if((isResidencial is None) or (len(isResidencial)==0)):
-                #Se for Residencial Iluminação pública = 0
+                #If it is Residencial assigns the Iluminação publica variable to 0
                 iluPlub = ""
                 
-                # obtain Número da Fatura não empresa #1
+                # obtain Número da Fatura Residencial
                 start = ["Nº"]
                 end = ["Série"]
                 nFatura = get_keyword(start, end, text)
@@ -72,12 +72,12 @@ def main():
                     nFatura = PDFname
                 else:
 
-                    #pegando mês e identificação não empresa
+                    #obtain mês and identificação residencial
                     start = ["0800 010 2570"]
                     end = ["Descrição"]
                     tempHolder = get_keyword(start, end, text)
 
-                    #Se não encontrar o primeiro telefone, procura pelo próximo
+                    #if does not find the first telephone number search for the other
                     if((tempHolder is None) or (len(tempHolder)==0)):
                         start = ["0800 010 1010"]
                         end = ["Descrição"]
@@ -90,7 +90,7 @@ def main():
                         del tempHolder
                     else:
 
-                        #extraindo identificação e mês
+                        #obtain identificação and mês
                         y = tempHolder.split(None, 7)
                         mes = y[2]
                         ident = y[6]
@@ -98,7 +98,7 @@ def main():
                         del y
                         del tempHolder
 
-                    #extraindo data de emissão n empresa
+                    #obtain data de emissão Residencial
                     start = ["Data de Emissão: "]
                     end = ["Apresentação"]
                     tempHolder = get_keyword(start, end, text)
@@ -107,7 +107,7 @@ def main():
                     del tempHolder
                     del y
 
-                     # obtain Data de emissão n empresa
+                     # obtain Data de emissão Residencial
                     start = ["Data de Emissão: "]
                     end = ["Apresentação"]
                     tempHolder = get_keyword(start, end, text)
@@ -116,14 +116,14 @@ def main():
                     del tempHolder
                     del y
 
-            #Especial para faturas de empresas
+            #Made for company bills
             else:
                 # obtain Número da Fatura #1
                 start = ["Nº."]
                 end = ["série"]
                 nFatura = get_keyword(start, end, text)
 
-                # obtain mes, n° serie e data vencimento EMPRESA #3
+                # obtain mes, n° serie and data vencimento EMPRESA #3
                 start = ["0800 770 4140"]
                 end = ["Descrição"]
                 tempHolder = get_keyword(start, end, text)
@@ -165,18 +165,19 @@ def main():
                     del tempHolder
                     del y
 
-            # create a list with the keywords extracted from current document.
+            # create a list with the keywords extracted from current document
             if(nFatura == PDFname):
                 for i in range(10):
                     my_list.append("")
                 my_list.insert(2, nFatura)
                 processFailed = True
             else:
-                # obter Valor Líquido #2
+                # obtain Valor Líquido #2
                 start = ["Total Consolidado"]
                 end = ["Consumo"]
                 tempHolder = get_keyword(start, end, text)
-                #Caso o valor não seja encontrado, será procurado em outra página
+                
+                #If the value was not found it will search in the next page
                 if((tempHolder is None)) or (len(tempHolder)==0):
                     page1 = pdf.pages[1]
                     text1 = page1.extract_text()
@@ -202,11 +203,11 @@ def main():
                 valorBru = y[0]
                 del tempHolder
                 del y
-                # Calculating correctly the value of "valorBru" if iluPlub different than 10,74
+                # correctly calculating the value of "valorBru" if iluPlub different than 10,74
                 if((iluPlub != 10.74) and (iluPlub != "")):
                     valorBru = (float(valorBru.replace(".", "").replace(",","."))) - iluPlub
                     darf = valorBru - (float(valorLiq.replace(".", "").replace(",", ".")))
-                # Calculating correctly the value of "valorBru" if "iluPlub" is 10,74
+                # correctly calculating  the value of "valorBru" if "iluPlub" is 10,74
                 elif((iluPlub == 10.74)):
                     valorBru = (float(valorBru.replace(".", "").replace(",","."))) + iluPlub
                     darf = valorBru - (float(valorLiq.replace(".", "").replace(",", ".")))
