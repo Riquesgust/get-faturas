@@ -40,7 +40,7 @@ def main():
     root = Tk()
     root.withdraw()
     #Salva o caminho da pasta 
-    currentPath = str(filedialog.askdirectory())    
+    currentPath = str(filedialog.askdirectory())
     #Adiciona a função *.pdf para abrir todas as pastas do diretório
     pdfPath = currentPath+"\*.pdf"
 
@@ -55,15 +55,13 @@ def main():
             my_list =[]
             # use the function get_keyword as many times to get all the desired keywords from a pdf document.
             
-            # Separa entre Empresa e Residencial
-            start = ["www.cpflempresas.com.br"]
-            end = ["Série"]
-            isResidencial = get_keyword(start, end, text)
-
-            # Caso não seja empresa executa esse trecho
-            if((isResidencial is None) or (len(isResidencial)==0)):
-                #Se for Residencial Iluminação pública = 0
-                iluPlub = ""
+            # Separa entre DTCEA-TRM e Globalizada
+            start = ["INSTALAÇÃO"]
+            end = ["Classe"]
+            isNotGlobal = get_keyword(start, end, text)
+            
+            # Caso não seja fatura Globalizada executa esse trecho
+            if((isNotGlobal is None) or (len(isNotGlobal)==0)):
                 
                 # obtain Número da Fatura não empresa #1
                 start = ["Nº"]
@@ -117,37 +115,60 @@ def main():
                     del tempHolder
                     del y
 
-            #Especial para faturas de empresas
+            #Especial para faturas DTCEA-TRM
             else:
-                # obtain Número da Fatura #1
-                start = ["Nº."]
-                end = ["série"]
-                nFatura = get_keyword(start, end, text)
+                # Identificação
+                isNotGlobal = isNotGlobal.split(None, 4)
+                ident = isNotGlobal[4]
+                del isNotGlobal
 
-                # obtain mes, n° serie e data vencimento EMPRESA #3
-                start = ["0800 770 4140"]
-                end = ["Descrição"]
-                tempHolder = get_keyword(start, end, text)
-                y = tempHolder.split(None, 5)
-                mes = y[2]
-                ident = y[1]
-                dataVenc = y[3]
-                tempList = list(mes.split("/"))
-                tempList1 = tempList[1][2:]
-                y = tempList[0]+'/'+tempList1
-                del tempHolder
-                del tempList1
-                del tempList
+                #Getting the Number of the Nota fiscal
+                start = ["NOTA FISCAL Nº"]
+                end = [" - "]
+                nFatura = get_keyword(start,end,text)
 
-                # obtain Data de emissão empresas
-                start = ["Data de Emissão "]
-                end = ["Apresentação"]
-                tempHolder = get_keyword(start, end, text)
-                y = tempHolder.split(None, 4)
-                dataEmi = y[0]
-                del tempHolder
-                del y
+                # obtain mes, valor Líquido e data vencimento #3
+                start = ["Referente a"]
+                end = ["BEIRA"]
+                cemigHeader= get_keyword(start, end, text)
+                cemigHeader= cemigHeader.split(None, 13)
+                dataVenc = cemigHeader[12]
+                mes = cemigHeader[11]
+                valorLiq = float(cemigHeader[13].replace(".","").replace(",","."))
+                del cemigHeader
 
+                #Obtain DATA EMISSÃO
+                start = ["emissão:"]
+                end = ["Consulte"]
+                dataEmi = get_keyword(start,end,text)
+                dataEmi = dataEmi.strip()
+
+                #Creating a empty list to fill with all the taxes found in the bill
+                taxesList = []
+                start = ["CSLL"]
+                end = ["Imposto"]
+                taxesList.append(get_keyword(start,end,text))
+                start = ["- COFINS"]
+                end = ["Imposto"]
+                taxesList.append(get_keyword(start,end,text))
+                start = ["- PIS/PASEP"]
+                end = ["Imposto"]
+                taxesList.append(get_keyword(start,end,text))
+                start = ["IRPJ"]
+                end = ["TOTAL"]
+                taxesList.append((get_keyword(start,end,text)))
+                start = ["DIC mensal - "]
+                end = ["Imposto"]
+                #Transforming the brazilian notation into american float, and summing to the total value
+                darf = 0
+                for i in range(0,4):
+                    taxesList[i] = float(taxesList[i].replace("-","").replace(".","").replace(",","."))
+                    darf += taxesList[i]
+
+                #defining the total value with taxes
+                valorBru = darf+valorLiq
+
+                
                 #obtain Taxa Iluminação EMPRESA
                 start = ["Total Devoluções/Ajustes"]
                 end = ["Consumo"]
@@ -165,6 +186,7 @@ def main():
         
                     del tempHolder
                     del y
+                
 
             # create a list with the keywords extracted from current document.
             if(nFatura == PDFname):
@@ -173,10 +195,13 @@ def main():
                 my_list.insert(2, nFatura)
                 processFailed = True
             else:
+                """
                 # obter Valor Líquido #2
                 start = ["Total Consolidado"]
                 end = ["Consumo"]
                 tempHolder = get_keyword(start, end, text)
+
+
                 #Caso o valor não seja encontrado, será procurado em outra página
                 if((tempHolder is None)) or (len(tempHolder)==0):
                     page1 = pdf.pages[1]
@@ -193,16 +218,7 @@ def main():
                     del tempHolder
                     del y
 
-               
 
-                # obtain Data de emissão #4
-                start = ["Total Distribuidora"]
-                end = ["Consumo"]
-                tempHolder = get_keyword(start, end, text)
-                y = tempHolder.split(None, 3)
-                valorBru = y[0]
-                del tempHolder
-                del y
                 # Calculating correctly the value of "valorBru" if iluPlub different than 10,74
                 if((iluPlub != 10.74) and (iluPlub != "")):
                     valorBru = (float(valorBru.replace(".", "").replace(",","."))) - iluPlub
@@ -215,6 +231,7 @@ def main():
                 else:
                     darf = float(valorBru.replace(".", "").replace(",",".")) - float(valorLiq.replace(".", "").replace(",", "."))
                     darf = round(darf, 2)
+                    """
                 entregaACI = ""
                 my_list = [ident,nFatura,mes,dataEmi,dataVenc,entregaACI,iluPlub,valorLiq, darf, valorBru]
                 processFailed = False
