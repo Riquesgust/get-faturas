@@ -63,10 +63,19 @@ def main():
             # Caso não seja fatura Globalizada executa esse trecho
             if((isNotGlobal is None) or (len(isNotGlobal)==0)):
                 
-                # obtain Número da Fatura não empresa #1
-                start = ["Nº"]
-                end = ["Série"]
-                nFatura = get_keyword(start, end, text)
+                # obtain ident, mes, vencimento, valorLiq #1
+                start = ["CONTA CONTRATO"]
+                end = ["DOCUMENTO"]
+                cemigHeader = get_keyword(start, end, text)
+                cemigHeader = cemigHeader.split(None)
+                ident = cemigHeader[8]
+                mes = cemigHeader[23]
+                dataVenc = cemigHeader[24]
+                valorLiq = float(cemigHeader[25].replace(".","").replace(",","."))
+                del cemigHeader
+                
+                
+                #
                 if(((nFatura is None) or (len(nFatura)==0))):
                     nFatura = PDFname
                 else:
