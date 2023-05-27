@@ -1,0 +1,1 @@
+Implement a list that summs all the darfs, valorLiq e valorBru from the bills that are not globalizada and DTCEA-TRM
